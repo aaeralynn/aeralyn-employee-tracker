@@ -11,5 +11,9 @@
   "dependencies": {
     "inquirer": "^8.2.4",
     "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "@types/dotenv": "^6.1.1",
+    "@types/pg": "^8.11.10"
   }
 }
