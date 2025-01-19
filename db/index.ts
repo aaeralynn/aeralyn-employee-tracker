@@ -1,8 +1,6 @@
-import { pool } from "./conections";
+import { pool } from "./connections";
 
-export default class Database {
-  static async query(text: string, params?: any[]) {
+export default class db {
+  constructor() { }
+  async query(sql: string, params?: any[]) {
     const client = await pool.connect();
-    try {
-      const
-  res = await client.query(text, params);
