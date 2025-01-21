@@ -26,6 +26,10 @@ function initialPrompts() {
             value: "Remove_Employee",
           },
           {
+            name: "View All Roles",
+            value: "View_Roles",
+          },
+          {
             name: "Add Role",
             value: "Add_Role",
           },
@@ -55,6 +59,69 @@ function initialPrompts() {
     ])
     .then((res) => {
       const choice = res.choice;
-      console.log("choice", choice);
+      switch (choice) {
+        case "View_Employees":
+          viewEmployees();
+          break;
+        case "Add_Employee":
+          addEmployee();
+          break;
+        case "Remove_Employee":
+          removeEmployee();
+          break;
+        case "View_Roles":
+          viewRoles();
+          break;
+        case "Add_Role":
+          addRole();
+          break;
+        case "Remove_Role":
+          removeRole();
+          break;
+        case "Add_Department":
+          addDepartment();
+          break;
+        case "Remove_Department":
+          removeDepartment();
+          break;
+        case "View_Departments":
+          viewDepartments();
+          break;
+        case "Exit":
+          exit();
+          break;
+        default:
+          break;
+      }
     });
+}
+
+function viewEmployees() {
+  db.findEmployees()
+    .then((res) => {
+      console.log("~ db.findEmployees ~ res:", res);
+      initialPrompts();
+    })
+    .then(() => initialPrompts());
+}
+
+function addEmployee() {}
+
+function removeEmployee() {}
+
+function viewRoles() {}
+
+function addRole() {}
+
+function removeRole() {}
+
+function addDepartment() {}
+
+function removeDepartment() {}
+
+function viewDepartments() {}
+
+function exit() {
+  console.log("Goodbye!");
+  process.exit();
 }
