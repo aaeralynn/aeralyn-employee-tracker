@@ -58,7 +58,7 @@ function initialPrompts() {
       },
     ])
     .then((res) => {
-      const choice = res.choice;
+      const choice = res.action;
       switch (choice) {
         case "View_Employees":
           viewEmployees();
@@ -99,10 +99,17 @@ function initialPrompts() {
 function viewEmployees() {
   db.findEmployees()
     .then((res) => {
-      console.log("~ db.findEmployees ~ res:", res);
-      initialPrompts();
+      const employees = res.rows; // Access the rows correctly
+      if (employees && employees.length > 0) {
+        console.table(employees); // Display the employees in a table format
+      } else {
+        console.log("No employees found."); // Handle case where no employees are returned
+      }
     })
-    .then(() => initialPrompts());
+    .catch((error) => {
+      console.error("Error retrieving employees:", error); // Handle any errors
+    })
+    .finally(() => initialPrompts()); // Ensure prompts are shown again after the operation
 }
 
 function addEmployee() {}
