@@ -179,6 +179,14 @@ function addEmployee() {
                     employee.roleId,
                     employee.managerId
                   );
+                })
+                .then(() => {
+                  console.log("Employee added successfully.");
+                  initialPrompts();
+                })
+                .catch((error) => {
+                  console.error("Error adding employee:", error);
+                  initialPrompts();
                 });
             });
           });
@@ -186,19 +194,227 @@ function addEmployee() {
     });
 }
 
-function removeEmployee() {}
+function removeEmployee() {
+  db.findEmployees()
+    .then((res) => {
+      const employees = res.rows;
+      const employeeChoices = employees.map((employee) => ({
+        name: `${employee.first_name} ${employee.last_name}`,
+        value: employee.id,
+      }));
 
-function viewRoles() {}
+      inquirer
+        .prompt({
+          type: "list",
+          name: "employee_id",
+          message: "Which employee would you like to remove?",
+          choices: employeeChoices,
+        })
+        .then((res) => {
+          const employeeId = res.employee_id;
 
-function addRole() {}
+          db.removeEmployee(employeeId)
+            .then(() => {
+              console.log("Employee removed successfully.");
+              initialPrompts();
+            })
+            .catch((error) => {
+              console.error("Error removing employee:", error);
+              initialPrompts();
+            });
+        });
+    })
+    .catch((error) => {
+      console.error("Error retrieving employees:", error);
+      initialPrompts();
+    });
+}
 
-function removeRole() {}
+function viewRoles() {
+  db.findAllRoles()
+    .then((res) => {
+      const roles = res.rows;
+      if (roles && roles.length > 0) {
+        console.table(roles);
+      } else {
+        console.log("No roles found.");
+      }
+    })
+    .catch((error) => {
+      console.error("Error retrieving roles:", error);
+    })
+    .finally(() => initialPrompts());
+}
 
-function addDepartment() {}
+function addRole() {
+  inquirer
+    .prompt([
+      {
+        name: "title",
+        message: "What is the title of the role?",
+      },
+      {
+        name: "salary",
+        message: "What is the salary for this role?",
+      },
+    ])
+    .then((res) => {
+      const title = res.title;
+      const salary = res.salary;
 
-function removeDepartment() {}
+      db.query("SELECT * FROM departments", [])
+        .then((res) => {
+          const departments = res.rows;
+          const departmentChoices = departments.map((department) => ({
+            name: department.name,
+            value: department.id,
+          }));
 
-function viewDepartments() {}
+          inquirer
+            .prompt({
+              type: "list",
+              name: "department_id",
+              message: "Which department does this role belong to?",
+              choices: departmentChoices,
+            })
+            .then((res) => {
+              const role = {
+                title: title,
+                salary: salary,
+                departmentId: res.department_id,
+              };
+
+              db.query(
+                "INSERT INTO role (title, salary, department_id) VALUES ($1, $2, $3)",
+                [role.title, role.salary, role.departmentId]
+              );
+            })
+            .then(() => {
+              console.log("Role added successfully.");
+              initialPrompts();
+            })
+            .catch((error) => {
+              console.error("Error adding role:", error);
+              initialPrompts();
+            });
+        })
+        .catch((error) => {
+          console.error("Error retrieving departments:", error);
+          initialPrompts();
+        });
+    });
+}
+
+function removeRole() {
+  db.findAllRoles()
+    .then((res) => {
+      const roles = res.rows;
+      const roleChoices = roles.map((role) => ({
+        name: role.title,
+        value: role.id,
+      }));
+
+      inquirer
+        .prompt({
+          type: "list",
+          name: "role_id",
+          message: "Which role would you like to remove?",
+          choices: roleChoices,
+        })
+        .then((res) => {
+          const roleId = res.role_id;
+
+          db.query("DELETE FROM role WHERE id = $1", [roleId])
+            .then(() => {
+              console.log("Role removed successfully.");
+              initialPrompts();
+            })
+            .catch((error) => {
+              console.error("Error removing role:", error);
+              initialPrompts();
+            });
+        });
+    })
+    .catch((error) => {
+      console.error("Error retrieving roles:", error);
+      initialPrompts();
+    });
+}
+
+function addDepartment() {
+  inquirer
+    .prompt([
+      {
+        name: "name",
+        message: "What is the name of the department?",
+      },
+    ])
+    .then((res) => {
+      const name = res.name;
+
+      db.query("INSERT INTO departments (name) VALUES ($1)", [name])
+        .then(() => {
+          console.log("Department added successfully.");
+          initialPrompts();
+        })
+        .catch((error) => {
+          console.error("Error adding department:", error);
+          initialPrompts();
+        });
+    });
+}
+
+function removeDepartment() {
+  db.query("SELECT * FROM departments", [])
+    .then((res) => {
+      const departments = res.rows;
+      const departmentChoices = departments.map((department) => ({
+        name: department.name,
+        value: department.id,
+      }));
+
+      inquirer
+        .prompt({
+          type: "list",
+          name: "department_id",
+          message: "Which department would you like to remove?",
+          choices: departmentChoices,
+        })
+        .then((res) => {
+          const departmentId = res.department_id;
+
+          db.query("DELETE FROM departments WHERE id = $1", [departmentId])
+            .then(() => {
+              console.log("Department removed successfully.");
+              initialPrompts();
+            })
+            .catch((error) => {
+              console.error("Error removing department:", error);
+              initialPrompts();
+            });
+        });
+    })
+    .catch((error) => {
+      console.error("Error retrieving departments:", error);
+      initialPrompts();
+    });
+}
+
+function viewDepartments() {
+  db.query("SELECT * FROM departments", [])
+    .then((res) => {
+      const departments = res.rows;
+      if (departments && departments.length > 0) {
+        console.table(departments);
+      } else {
+        console.log("No departments found.");
+      }
+    })
+    .catch((error) => {
+      console.error("Error retrieving departments:", error);
+    })
+    .finally(() => initialPrompts());
+}
 
 function exit() {
   console.log("Goodbye!");

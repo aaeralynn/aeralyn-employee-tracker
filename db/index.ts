@@ -31,15 +31,42 @@ export default class Db {
     roleId: number,
     managerId: number
   ) {
-    // Implementation for adding a new employee
+    const sql = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ($1, $2, $3, $4)`;
+    return this.query(sql, [firstName, lastName, roleId, managerId]);
   }
 
   findAllRoles() {
     return this.query(
-      `SELECT role.id, role.title, department.name
-    AS department, role.salary FROM role LEFT JOIN department on
-    role.department_id = department.id;`,
+      `SELECT role.id, role.title, departments.name AS department, role.salary 
+         FROM role 
+         LEFT JOIN departments ON role.department_id = departments.id;`,
       []
     );
+  }
+
+  addRole(title: string, salary: number, departmentId: number) {
+    const sql = `INSERT INTO role (title, salary, department_id) VALUES ($1, $2, $3)`;
+    return this.query(sql, [title, salary, departmentId]);
+  }
+
+  removeRole(id: number) {
+    return this.query(`DELETE FROM role WHERE id = $1`, [id]);
+  }
+
+  removeEmployee(id: number) {
+    return this.query(`DELETE FROM employee WHERE id = $1`, [id]);
+  }
+
+  addDepartment(name: string) {
+    const sql = `INSERT INTO departments (name) VALUES ($1)`;
+    return this.query(sql, [name]);
+  }
+
+  viewDepartments() {
+    return this.query(`SELECT * FROM departments`, []);
+  }
+
+  removeDepartment(id: number) {
+    return this.query(`DELETE FROM departments WHERE id = $1`, [id]);
   }
 }
