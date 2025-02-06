@@ -112,7 +112,79 @@ function viewEmployees() {
     .finally(() => initialPrompts()); // Ensure prompts are shown again after the operation
 }
 
-function addEmployee() {}
+function addEmployee() {
+  inquirer
+    .prompt([
+      {
+        name: "first_name",
+        message: "What is the employee's first name?",
+      },
+      {
+        name: "last_name",
+        message: "What is the employee's last name?",
+      },
+    ])
+    .then((res) => {
+      const firstName = res.first_name;
+      const lastName = res.last_name;
+
+      db.findAllRoles().then((rolesRes) => {
+        const roles = rolesRes.rows;
+        const roleChoices = roles.map((role) => ({
+          name: role.title,
+          value: role.id,
+        }));
+
+        inquirer
+          .prompt({
+            type: "list",
+            name: "role_id",
+            message: "What is the employee's role?",
+            choices: roleChoices,
+          })
+          .then((res) => {
+            const roleId = res.role_id;
+
+            db.findEmployees().then((res) => {
+              const employees = res.rows;
+              const managerChoices = employees.map((employee) => {
+                const id = employee.id;
+                const firstName = employee.first_name;
+                const lastName = employee.last_name;
+                return {
+                  name: `${firstName} ${lastName}`,
+                  value: id,
+                };
+              });
+              managerChoices.unshift({ name: "None", value: null });
+
+              inquirer
+                .prompt({
+                  type: "list",
+                  name: "manager_id",
+                  message: "Who is the employee's manager?",
+                  choices: managerChoices,
+                })
+                .then((res) => {
+                  const employee = {
+                    firstName: firstName,
+                    lastName: lastName,
+                    roleId: roleId,
+                    managerId: res.manager_id,
+                  };
+
+                  db.addNewEmployee(
+                    employee.firstName,
+                    employee.lastName,
+                    employee.roleId,
+                    employee.managerId
+                  );
+                });
+            });
+          });
+      });
+    });
+}
 
 function removeEmployee() {}
 

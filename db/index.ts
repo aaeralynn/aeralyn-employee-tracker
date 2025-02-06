@@ -17,7 +17,11 @@ export default class Db {
   }
 
   async findEmployees() {
-    const sql = `SELECT * FROM employee`;
+    const sql = `SELECT employee.id, employee.first_name, employee.last_name, role.title, departments.name AS department, role.salary, CONCAT(manager.first_name, ' ', manager.last_name) AS manager 
+                 FROM employee 
+                 LEFT JOIN role ON employee.role_id = role.id 
+                 LEFT JOIN departments ON role.department_id = departments.id 
+                 LEFT JOIN employee AS manager ON employee.manager_id = manager.id;`;
     return this.query(sql, []); // Ensure this returns the result of the query
   }
 
@@ -28,5 +32,14 @@ export default class Db {
     managerId: number
   ) {
     // Implementation for adding a new employee
+  }
+
+  findAllRoles() {
+    return this.query(
+      `SELECT role.id, role.title, department.name
+    AS department, role.salary FROM role LEFT JOIN department on
+    role.department_id = department.id;`,
+      []
+    );
   }
 }
